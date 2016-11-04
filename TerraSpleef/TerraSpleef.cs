@@ -12,6 +12,10 @@ namespace TerraSpleef
     {
         //Vars
 
+        //Create vars
+        public bool isCreating;
+        public spleef createArea = new spleef();
+
         //Load stage
         public override string Name
         {
@@ -75,8 +79,69 @@ namespace TerraSpleef
             string basePar = args.Parameters[0];
             TSPlayer play = args.Player;
             spleef area = new spleef();
+            SQLDialogs sqd = new SQLDialogs();
+            TerraSpleef TS = new TerraSpleef(Game);
+
+            switch(basePar)
+            {
+                case "info":
+                    {
+
+                        break;
+                    }
+
+                case "start":
+                    {
+                        string aName = args.Parameters[1];
+
+                        if(aName == "")
+                        {
+                            play.SendErrorMessage("Wrong command usage!");
+                            play.SendErrorMessage("/tspleef start <arena name> <number of players>");
+                            break;
+                        }
+
+                        List<string> lNamesArea = sqd.getNames();
+
+                        foreach (string a in lNamesArea)
+                        {
+                            if(a == aName)
+                            {
+                                area.name = aName;
+                            }
+                        }
+
+                        if(area.name == null)
+                        {
+                            play.SendErrorMessage("Wrong area name!");
+                            break;
+                        }
 
 
+
+                        break;
+                    }
+
+                case "create": // /tspleef create name ... /tspleef create spawnpos  ... /tspleef create specpos ... /tspleef create save
+                    {
+
+                        break;
+                    }
+
+                case "commands":
+                    {
+                        play.SendInfoMessage("");
+                        break;
+                    }
+
+                default:
+                    {
+                        play.SendInfoMessage("TerraSpleef " + TS.Version);
+                        play.SendInfoMessage("Use /tspleef commands to see all the avaible commands");
+                        break;
+                    }
+                    //Switch end
+            }
         }
         //End of Commands exe voids
 

@@ -21,21 +21,24 @@ namespace TerraSpleef
         float CY { get; set; }
 
         //Functions
+        public List<string> getNames()
+        {
 
+        }
     }
 
     public class spleef
     {
         //Area info
-        int ID { get; set; }
-        string name { get; set; }
-        int aPlayer { get; set; }
+        public int ID { get; set; }
+        public string name { get; set; }
+        public int aPlayer { get; set; }
         List <string> lPlayers { get; set; }
         //Area cords
-        float stX { get; set; }
-        float stY { get; set; }
-        float spX { get; set; }
-        float spY { get; set; }
+        public float stX { get; set; }
+        public float stY { get; set; }
+        public float spX { get; set; }
+        public float spY { get; set; }
 
         //Functions
 

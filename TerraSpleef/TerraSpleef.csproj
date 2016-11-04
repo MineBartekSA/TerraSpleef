@@ -46,6 +46,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes.cs" />
     <Compile Include="TerraSpleef.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

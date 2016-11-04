@@ -63,6 +63,7 @@ namespace TerraSpleef
             {
                 HelpText = "A TerraSpleef base command"
             });
+
         }
         //End of Commands
 
@@ -71,6 +72,10 @@ namespace TerraSpleef
         //Commands exe voids
         void spleefCMD(CommandArgs args)
         {
+            string basePar = args.Parameters[0];
+            TSPlayer play = args.Player;
+            spleef area = new spleef();
+
 
         }
         //End of Commands exe voids

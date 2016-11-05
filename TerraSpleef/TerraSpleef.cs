@@ -11,7 +11,8 @@ namespace TerraSpleef
     public class TerraSpleef : TerrariaPlugin
     {
         //Vars
-
+        public SQLDialogs sqld = new SQLDialogs();
+        public List<spleef> activeSpleefs = new List<spleef>(); 
         //Create vars
         public bool isCreating;
         public spleef createArea = new spleef();
@@ -39,9 +40,10 @@ namespace TerraSpleef
         }
         public override void Initialize()
         {
-
+            sqld.Tables();
             //Hooks
             ServerApi.Hooks.GameInitialize.Register(this, OnInitialize);
+            ServerApi.Hooks.NetGetData.Register(this, OnGetData);
         }
         protected override void Dispose(bool disposing)
         {
@@ -49,6 +51,7 @@ namespace TerraSpleef
             {
                 //UnHooks
                 ServerApi.Hooks.GameInitialize.Deregister(this, OnInitialize);
+                ServerApi.Hooks.NetGetData.Deregister(this, OnGetData);
             }
             base.Dispose(disposing);
         }
@@ -114,10 +117,75 @@ namespace TerraSpleef
                         if(area.name == null)
                         {
                             play.SendErrorMessage("Wrong area name!");
+                            play.SendErrorMessage("/tspleef start <arena name> <number of players>");
                             break;
                         }
 
+                        if(args.Parameters[2] != null)
+                        {
+                            int aPlay;
+                            try
+                            {
+                                aPlay = Int32.Parse(args.Parameters[2]);
+                            }
+                            catch (FormatException exe)
+                            {
+                                play.SendErrorMessage("Wrong number!");
+                                play.SendErrorMessage("/tspleef start <arena name> <number of players>");
+                                TShock.Log.Error("There is an exception :");
+                                TShock.Log.Error(exe.ToString());
+                                break;
+                            }
+                            if(aPlay > 5)
+                            {
+                                play.SendErrorMessage("Max number of player is 5");
+                                break;
+                            }
+                            area.aPlayer = aPlay;
+                        }
+                        else if (args.Parameters[2] == null)
+                        {
+                            area.aPlayer = 5;
+                            play.SendInfoMessage("Setting 5 players in area");
+                        }
 
+                        SQLDialogs readed = SQLDialogs.readArea(area.name);
+                        area.ID = readed.ID;
+                        area.stX = readed.stX;
+                        area.stY = readed.stY;
+                        area.spX = readed.spX;
+                        area.spY = readed.spY;
+
+                        area.lPlayers.Add(play);
+
+                        play.Teleport(area.stX, area.stY);
+
+                        activeSpleefs.Add(area);
+
+                        TSPlayer.All.SendInfoMessage("There a new spleef starts!");
+                        TSPlayer.All.SendInfoMessage("To join typer /tspleef join " + area.name);
+
+                        gAutoStart auto = new gAutoStart()
+                        {
+                            game = area
+                        };
+
+                        new Thread(new ThreadStart(auto.gameAutoStart)).Start();
+
+                        break;
+                    }
+
+                case "join":
+                    {
+                        string name = args.Parameters[1];
+
+                        foreach(var aArea in activeSpleefs)
+                        {
+                            if (aArea.name == name)
+                            {
+                                play.Teleport(aArea.stX, aArea.stY);
+                            }
+                        }
 
                         break;
                     }
@@ -148,6 +216,10 @@ namespace TerraSpleef
 
 
         //Other voids
+        void OnGetData(GetDataEventArgs args)
+        {
+
+        }
         //End of Other voids
     }
 }

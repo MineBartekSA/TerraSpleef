@@ -114,6 +114,21 @@ namespace TerraSpleef
 
         public void gameAutoStart()
         {
+            int numerOfPlayers = 0;
+
+            while (numerOfPlayers != game.aPlayer)
+            {
+                if(numerOfPlayers != game.lPlayers.Count)
+                {
+                    numerOfPlayers = game.lPlayers.Count;
+                    for(int i = 0; i <= game.lPlayers.Count; i++)
+                    {
+                        game.lPlayers[i].SendInfoMessage("There is " + numerOfPlayers + " of " + game.aPlayer + " players in this spleef");
+                    }
+                }
+            }
+
+            
 
         }
     }

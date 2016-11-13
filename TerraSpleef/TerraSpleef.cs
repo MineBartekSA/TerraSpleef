@@ -5,6 +5,9 @@ using TShockAPI;
 using TShockAPI.DB;
 using TerrariaApi.Server;
 using Terraria;
+using System.IO;
+using System.Linq;
+using TerraSpleef.Extensions;
 
 namespace TerraSpleef
 {
@@ -12,7 +15,7 @@ namespace TerraSpleef
     {
         //Vars
         public SQLDialogs sqld = new SQLDialogs();
-        public List<spleef> activeSpleefs = new List<spleef>(); 
+        public List<spleef> activeSpleefs = new List<spleef>();
         //Create vars
         public bool isCreating;
         public spleef createArea = new spleef();
@@ -85,7 +88,7 @@ namespace TerraSpleef
             SQLDialogs sqd = new SQLDialogs();
             TerraSpleef TS = new TerraSpleef(Game);
 
-            switch(basePar)
+            switch (basePar)
             {
                 case "info":
                     {
@@ -97,7 +100,7 @@ namespace TerraSpleef
                     {
                         string aName = args.Parameters[1];
 
-                        if(aName == "")
+                        if (aName == "")
                         {
                             play.SendErrorMessage("Wrong command usage!");
                             play.SendErrorMessage("/tspleef start <arena name> <number of players>");
@@ -108,20 +111,20 @@ namespace TerraSpleef
 
                         foreach (string a in lNamesArea)
                         {
-                            if(a == aName)
+                            if (a == aName)
                             {
                                 area.name = aName;
                             }
                         }
 
-                        if(area.name == null)
+                        if (area.name == null)
                         {
                             play.SendErrorMessage("Wrong area name!");
                             play.SendErrorMessage("/tspleef start <arena name> <number of players>");
                             break;
                         }
 
-                        if(args.Parameters[2] != null)
+                        if (args.Parameters[2] != null)
                         {
                             int aPlay;
                             try
@@ -136,7 +139,7 @@ namespace TerraSpleef
                                 TShock.Log.Error(exe.ToString());
                                 break;
                             }
-                            if(aPlay > 5)
+                            if (aPlay > 5)
                             {
                                 play.SendErrorMessage("Max number of player is 5");
                                 break;
@@ -179,7 +182,7 @@ namespace TerraSpleef
                     {
                         string name = args.Parameters[1];
 
-                        foreach(var aArea in activeSpleefs)
+                        foreach (var aArea in activeSpleefs)
                         {
                             if (aArea.name == name)
                             {
@@ -190,8 +193,69 @@ namespace TerraSpleef
                         break;
                     }
 
-                case "create": // /tspleef create name ... /tspleef create spawnpos  ... /tspleef create specpos ... /tspleef create save
+                case "create": // /tspleef create name ... /tspleef create point1 ... /tspleef create point2 ... /tspleef create spawnpos  ... /tspleef create specpos ... /tspleef create save
                     {
+                        string para = args.Parameters[1];
+                        PlayerInfo info = args.Player.GetPlayerInfo();
+
+                        if (para == "point1" && isCreating)
+                        {
+                            info.Point = 1;
+                            args.Player.SendInfoMessage("Modify a block to set point 1.");
+                            break;
+                        }
+                        else if (para == "point2" && isCreating)
+                        {
+                            info.Point = 2;
+                            args.Player.SendInfoMessage("Modify a block to set point 2.");
+                            break;
+                        }
+                        else if (para == "spawnpos" && isCreating)
+                        {
+                            float playerX = args.Player.X;
+                            float playerY = args.Player.Y;
+
+                            createArea.stX = playerX;
+                            createArea.stY = playerY;
+
+                            args.Player.SendInfoMessage("You set a spawn point for new spleef area");
+                            break;
+                        }
+                        else if (para == "specpos" && isCreating)
+                        {
+                            float playerX = args.Player.X;
+                            float playerY = args.Player.Y;
+
+                            createArea.spX = playerX;
+                            createArea.spY = playerY;
+
+                            args.Player.SendInfoMessage("You set a spactate point for new spleef area");
+                            break;
+                        }
+                        else if (para == "save" && isCreating)
+                        {
+                            args.Player.SendInfoMessage("Saving area " + createArea.name + " in progress ...");
+
+                        }
+                        else if (!isCreating)
+                        {
+                            string name = args.Parameters[2];
+                            createArea.name = name;
+                            args.Player.SendInfoMessage("Name of this are will be: " + createArea.name);
+                            break;
+                        }
+                        else
+                        {
+                            if(isCreating)
+                            {
+                                args.Player.SendErrorMessage("Someone is alredy creating a spleef are please wait");
+                                args.Player.SendErrorMessage("Or you type a wrong command");
+                                break;
+                            }
+                            args.Player.SendErrorMessage("You type a wrong command or you don't start creating area!");
+                            args.Player.SendErrorMessage("Please use a valid command or /tspleef create <name of area>");
+                            break;
+                        }
 
                         break;
                     }
@@ -218,8 +282,43 @@ namespace TerraSpleef
         //Other voids
         void OnGetData(GetDataEventArgs args)
         {
+            switch (args.MsgID)
+            {
+                #region Packet 17 - Tile
 
+                case PacketTypes.Tile:
+                    PlayerInfo info = TShock.Players[args.Msg.whoAmI].GetPlayerInfo();
+                    if (info.Point != 0)
+                    {
+                        using (var reader = new BinaryReader(new MemoryStream(args.Msg.readBuffer, args.Index, args.Length)))
+                        {
+                            reader.ReadByte();
+                            int x = reader.ReadInt16();
+                            int y = reader.ReadInt16();
+                            if (x >= 0 && y >= 0 && x < Main.maxTilesX && y < Main.maxTilesY)
+                            {
+                                if (info.Point == 1)
+                                {
+                                    info.X = x;
+                                    info.Y = y;
+                                    TShock.Players[args.Msg.whoAmI].SendInfoMessage("Set point 1.");
+                                }
+                                else if (info.Point == 2)
+                                {
+                                    info.X2 = x;
+                                    info.Y2 = y;
+                                    TShock.Players[args.Msg.whoAmI].SendInfoMessage("Set point 2.");
+                                }
+                                info.Point = 0;
+                                args.Handled = true;
+                                TShock.Players[args.Msg.whoAmI].SendTileSquare(x, y, 3);
+                            }
+                        }
+                    }
+                    return;
+                    #endregion
+            }
+            //End of Other voids
         }
-        //End of Other voids
     }
 }

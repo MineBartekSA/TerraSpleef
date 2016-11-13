@@ -16,6 +16,8 @@ namespace TerraSpleef
         public float stY { get; set; }
         public float spX { get; set; }
         public float spY { get; set; }
+        public int point1 { get; set; }
+        public int point2 { get; set; }
         //Chest Table
         public int CID { get; set; }
         public float CX { get; set; }
@@ -31,7 +33,9 @@ namespace TerraSpleef
                 new SqlColumn("stX", MySqlDbType.Int32),
                 new SqlColumn("stY", MySqlDbType.Int32),
                 new SqlColumn("spX", MySqlDbType.Int32),
-                new SqlColumn("spY", MySqlDbType.Int32)
+                new SqlColumn("spY", MySqlDbType.Int32),
+                new SqlColumn("point1", MySqlDbType.Int32),
+                new SqlColumn("point2", MySqlDbType.Int32)
                 );
             //Chest table
             var chestTable = new SqlTable("TerraSpleef-Chest",
@@ -73,7 +77,9 @@ namespace TerraSpleef
                     stX = reader.Get<int>("stX"),
                     stY = reader.Get<int>("stY"),
                     spX = reader.Get<int>("spX"),
-                    spY = reader.Get<int>("spY")
+                    spY = reader.Get<int>("spY"),
+                    point1 = reader.Get<int>("point1"),
+                    point2 = reader.Get<int>("point2")
                 };
             }
             return area;
@@ -98,6 +104,8 @@ namespace TerraSpleef
         public float stY { get; set; }
         public float spX { get; set; }
         public float spY { get; set; }
+        public int point1 { get; set; }
+        public int point2 { get; set; }
 
         //Functions
 

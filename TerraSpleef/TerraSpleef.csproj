@@ -50,6 +50,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes.cs" />
+    <Compile Include="Extensions\TSPlayerExt.cs" />
+    <Compile Include="PlayerInfo.cs" />
     <Compile Include="TerraSpleef.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
